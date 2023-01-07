@@ -1,0 +1,77 @@
+<div id="add-album" class="d-none">
+    Agregar al album:
+
+    <form action="/add-to-album" method="post">
+        <input type="hidden" name="ids">
+        <select name="albumid">
+
+
+            <% albums.forEach(album => { %>
+            <option value="<%= album._id %>"><%= album.name %></option>
+            <% }) %>
+
+        </select>
+        <input type="submit" value="Agregar" class="btn btn-primary">
+    </form>
+</div>
+
+<div class="photos container-fluid d-flex flex-wrap gap-1">
+    <% photos.forEach(photo => { %>
+    <div class="photo">
+        <div class="select-container">
+            <input type="checkbox" class="select-photo" value="<%= photo._id %>">
+        </div>
+        <a href="/view/<%= photo._id %>?origin=<%= origin %>">
+            <img src="http://localhost:3001/images/<%= photo.filename %>" />
+        </a>
+        <div class="actions-container">
+            <% if(photo.userid === user._id) {
+                if(photo.favorite){%>
+            <form action="/remove-favorite" method="post">
+                <input type="hidden" name="photoid" value="<%= photo._id %>">
+                <input type="hidden" name="origin" value="<%= origin %>">
+                <button class="btn btn-danger">Remove Favorite</button>
+            </form>
+            <% }else{ %>
+            <form action="/add-favorite" method="post">
+                <input type="hidden" name="photoid" value="<%= photo._id %>">
+                <input type="hidden" name="origin" value="<%= origin %>">
+                <button class="btn btn-danger">Favorite</button>
+            </form>
+            <% }%>
+            <% } %>
+        </div>
+    </div>
+    <% }); %>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('.select-photo');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('click', (e) => {
+            if (checkSelected()) {
+                addSelectedPhotos();
+                document.querySelector('#add-album').classList.remove('d-none');
+            } else {
+                document.querySelector('#add-album').classList.add('d-none');
+            }
+        });
+    });
+
+    function checkSelected() {
+        let selected = false;
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selected = true;
+            }
+        });
+        return selected;
+    }
+
+    function addSelectedPhotos() {
+        const cb = document.querySelectorAll('.select-photo:checked');
+        const ids = [...cb].map(c => c.value);
+        document.querySelector('input[name="ids"]').value = ids.join(',');
+    }
+</script>
